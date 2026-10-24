@@ -29,11 +29,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Accept Android SDK licenses
-        run: |
-          mkdir -p "$ANDROID_HOME/licenses"
-          yes | sdkmanager --licenses || true
+        with:
+          packages: |
+            platform-tools
+          accept-android-sdk-licenses: true
 
       - name: Install Android SDK packages
         run: |
@@ -47,6 +46,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+
+      - name: Check project structure
+        run: |
+          test -f settings.gradle
+          test -f build.gradle
+          test -f app/build.gradle
+          test -f app/src/main/cpp/CMakeLists.txt
+          test -f app/src/main/cpp/imgui/imgui.cpp
 
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace :app:assembleDebug
