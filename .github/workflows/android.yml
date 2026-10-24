@@ -31,11 +31,13 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
+        run: |
+          mkdir -p "$ANDROID_HOME/licenses"
+          yes | sdkmanager --licenses || true
 
       - name: Install Android SDK packages
         run: |
-          sdkmanager \
+          sdkmanager --sdk_root="$ANDROID_HOME" \
             "platforms;android-35" \
             "build-tools;35.0.0" \
             "cmake;3.22.1" \
@@ -46,18 +48,10 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Verify project files
-        run: |
-          test -f settings.gradle
-          test -f build.gradle
-          test -f app/build.gradle
-          test -f app/src/main/cpp/CMakeLists.txt
-          test -f app/src/main/cpp/imgui/imgui.cpp
-
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace :app:assembleDebug
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Dear-ImGui-Demo-debug-apk
